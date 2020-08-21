@@ -1,6 +1,6 @@
 {
-    "name": "man4red/module-sample-payment-gateway",
-    "description": "Demonstrates integration with payment gateway",
+    "name": "man4red/module-gatewayservices-payment-gateway",
+    "description": "Gateway Services integration",
     "require": {
         "php": "~5.5.0|~5.6.0|~7.0.0",
         "magento/module-sales": "100.0.*",
@@ -18,7 +18,7 @@
     "autoload": {
         "files": [ "registration.php" ],
         "psr-4": {
-            "Man4red\\SamplePaymentGateway\\": ""
+            "Man4red\\GatewayServicesPaymentGateway\\": ""
         }
     }
 }
