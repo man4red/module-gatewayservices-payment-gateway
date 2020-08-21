@@ -23,10 +23,10 @@
                                                         <item name="renders" xsi:type="array">
                                                             <!-- merge payment method renders here -->
                                                             <item name="children" xsi:type="array">
-                                                                <item name="sample_gateway" xsi:type="array">
-                                                                    <item name="component" xsi:type="string">Manfred_GatewayServicesPaymentGateway/js/view/payment/sample_gateway</item>
+                                                                <item name="gatewayservices_gateway" xsi:type="array">
+                                                                    <item name="component" xsi:type="string">Manfred_GatewayServicesPaymentGateway/js/view/payment/gatewayservices_gateway</item>
                                                                     <item name="methods" xsi:type="array">
-                                                                        <item name="sample_gateway" xsi:type="array">
+                                                                        <item name="gatewayservices_gateway" xsi:type="array">
                                                                             <item name="isBillingAddressRequired" xsi:type="boolean">true</item>
                                                                         </item>
                                                                     </item>

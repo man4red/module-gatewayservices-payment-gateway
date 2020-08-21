@@ -9,7 +9,7 @@
     <type name="Magento\Checkout\Model\CompositeConfigProvider">
         <arguments>
             <argument name="configProviders" xsi:type="array">
-                <item name="sample_gateway_config_provider" xsi:type="object">Manfred\GatewayServicesPaymentGateway\Model\Ui\ConfigProvider</item>
+                <item name="gatewayservices_gateway_config_provider" xsi:type="object">Manfred\GatewayServicesPaymentGateway\Model\Ui\ConfigProvider</item>
             </argument>
         </arguments>
     </type>

@@ -13,7 +13,7 @@ use Manfred\GatewayServicesPaymentGateway\Gateway\Http\Client\ClientMock;
  */
 final class ConfigProvider implements ConfigProviderInterface
 {
-    const CODE = 'sample_gateway';
+    const CODE = 'gatewayservices_gateway';
 
     /**
      * Retrieve assoc array of checkout configuration
