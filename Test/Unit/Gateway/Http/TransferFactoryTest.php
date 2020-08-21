@@ -7,8 +7,8 @@ namespace Magento\SamplePaymentProvider\Test\Unit\Gateway\Http;
 
 use Magento\Payment\Gateway\Http\TransferBuilder;
 use Magento\Payment\Gateway\Http\TransferInterface;
-use Magento\SamplePaymentGateway\Gateway\Http\TransferFactory;
-use Magento\SamplePaymentGateway\Gateway\Request\MockDataRequest;
+use Manfred\GatewayServicesPaymentGateway\Gateway\Http\TransferFactory;
+use Manfred\GatewayServicesPaymentGateway\Gateway\Request\MockDataRequest;
 
 class TransferFactoryTest extends \PHPUnit_Framework_TestCase
 {

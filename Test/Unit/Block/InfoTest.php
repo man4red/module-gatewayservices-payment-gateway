@@ -3,12 +3,12 @@
  * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\SamplePaymentGateway\Test\Unit\Block;
+namespace Manfred\GatewayServicesPaymentGateway\Test\Unit\Block;
 
 use Magento\Framework\View\Element\Template\Context;
 use Magento\Payment\Gateway\ConfigInterface;
 use Magento\Payment\Model\InfoInterface;
-use Magento\SamplePaymentGateway\Block\Info;
+use Manfred\GatewayServicesPaymentGateway\Block\Info;
 
 class InfoTest extends \PHPUnit_Framework_TestCase
 {

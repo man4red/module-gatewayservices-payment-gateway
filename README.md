@@ -45,13 +45,13 @@ In a case of Payment Gateway, DI configuration is used to define pools of `Gatew
 Payment Method Facade configuration:
 ```xml
 <!-- Payment Method Facade configuration -->
-<virtualType name="SamplePaymentGatewayFacade" type="Magento\Payment\Model\Method\Adapter">
+<virtualType name="GatewayServicesPaymentGatewayFacade" type="Magento\Payment\Model\Method\Adapter">
     <arguments>
-        <argument name="code" xsi:type="const">\Magento\SamplePaymentGateway\Model\Ui\ConfigProvider::CODE</argument>
+        <argument name="code" xsi:type="const">\Manfred\GatewayServicesPaymentGateway\Model\Ui\ConfigProvider::CODE</argument>
         <argument name="formBlockType" xsi:type="string">Magento\Payment\Block\Form</argument>
-        <argument name="infoBlockType" xsi:type="string">Magento\SamplePaymentGateway\Block\Info</argument>
-        <argument name="valueHandlerPool" xsi:type="object">SamplePaymentGatewayValueHandlerPool</argument>
-        <argument name="commandPool" xsi:type="object">SamplePaymentGatewayCommandPool</argument>
+        <argument name="infoBlockType" xsi:type="string">Manfred\GatewayServicesPaymentGateway\Block\Info</argument>
+        <argument name="valueHandlerPool" xsi:type="object">GatewayServicesPaymentGatewayValueHandlerPool</argument>
+        <argument name="commandPool" xsi:type="object">GatewayServicesPaymentGatewayCommandPool</argument>
     </arguments>
 </virtualType>
 ```
@@ -71,16 +71,16 @@ There should be at least one Value Handler with `default` key provided for Value
 
 ```xml
 !-- Value handlers infrastructure -->
-<virtualType name="SamplePaymentGatewayValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
+<virtualType name="GatewayServicesPaymentGatewayValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
     <arguments>
         <argument name="handlers" xsi:type="array">
-            <item name="default" xsi:type="string">SamplePaymentGatewayConfigValueHandler</item>
+            <item name="default" xsi:type="string">GatewayServicesPaymentGatewayConfigValueHandler</item>
         </argument>
     </arguments>
 </virtualType>
-<virtualType name="SamplePaymentGatewayConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
+<virtualType name="GatewayServicesPaymentGatewayConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
     <arguments>
-        <argument name="configInterface" xsi:type="object">SamplePaymentGatewayConfig</argument>
+        <argument name="configInterface" xsi:type="object">GatewayServicesPaymentGatewayConfig</argument>
     </arguments>
 </virtualType>
 ```
@@ -89,12 +89,12 @@ There should be at least one Value Handler with `default` key provided for Value
 All gateway commands should be added to CommandPool instance
 ```xml
 <!-- Commands infrastructure -->
-<virtualType name="SamplePaymentGatewayCommandPool" type="Magento\Payment\Gateway\Command\CommandPool">
+<virtualType name="GatewayServicesPaymentGatewayCommandPool" type="Magento\Payment\Gateway\Command\CommandPool">
     <arguments>
         <argument name="commands" xsi:type="array">
-            <item name="authorize" xsi:type="string">SamplePaymentGatewayAuthorizeCommand</item>
-            <item name="capture" xsi:type="string">SamplePaymentGatewayCaptureCommand</item>
-            <item name="void" xsi:type="string">SamplePaymentGatewayVoidCommand</item>
+            <item name="authorize" xsi:type="string">GatewayServicesPaymentGatewayAuthorizeCommand</item>
+            <item name="capture" xsi:type="string">GatewayServicesPaymentGatewayCaptureCommand</item>
+            <item name="void" xsi:type="string">GatewayServicesPaymentGatewayVoidCommand</item>
         </argument>
     </arguments>
 </virtualType>
@@ -103,43 +103,43 @@ All gateway commands should be added to CommandPool instance
 Example of Authorization command configuration:
 ```xml
 <!-- Authorize command -->
-<virtualType name="SamplePaymentGatewayAuthorizeCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
+<virtualType name="GatewayServicesPaymentGatewayAuthorizeCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
     <arguments>
-        <argument name="requestBuilder" xsi:type="object">SamplePaymentGatewayAuthorizationRequest</argument>
-        <argument name="handler" xsi:type="object">SamplePaymentGatewayResponseHandlerComposite</argument>
-        <argument name="transferFactory" xsi:type="object">Magento\SamplePaymentGateway\Gateway\Http\TransferFactory</argument>
-        <argument name="client" xsi:type="object">Magento\SamplePaymentGateway\Gateway\Http\Client\ClientMock</argument>
+        <argument name="requestBuilder" xsi:type="object">GatewayServicesPaymentGatewayAuthorizationRequest</argument>
+        <argument name="handler" xsi:type="object">GatewayServicesPaymentGatewayResponseHandlerComposite</argument>
+        <argument name="transferFactory" xsi:type="object">Manfred\GatewayServicesPaymentGateway\Gateway\Http\TransferFactory</argument>
+        <argument name="client" xsi:type="object">Manfred\GatewayServicesPaymentGateway\Gateway\Http\Client\ClientMock</argument>
     </arguments>
 </virtualType>
 
 <!-- Authorization Request -->
-<virtualType name="SamplePaymentGatewayAuthorizationRequest" type="Magento\Payment\Gateway\Request\BuilderComposite">
+<virtualType name="GatewayServicesPaymentGatewayAuthorizationRequest" type="Magento\Payment\Gateway\Request\BuilderComposite">
     <arguments>
         <argument name="builders" xsi:type="array">
-            <item name="transaction" xsi:type="string">Magento\SamplePaymentGateway\Gateway\Request\AuthorizationRequest</item>
-            <item name="mockData" xsi:type="string">Magento\SamplePaymentGateway\Gateway\Request\MockDataRequest</item>
+            <item name="transaction" xsi:type="string">Manfred\GatewayServicesPaymentGateway\Gateway\Request\AuthorizationRequest</item>
+            <item name="mockData" xsi:type="string">Manfred\GatewayServicesPaymentGateway\Gateway\Request\MockDataRequest</item>
         </argument>
     </arguments>
 </virtualType>
-<type name="Magento\SamplePaymentGateway\Gateway\Request\AuthorizationRequest">
+<type name="Manfred\GatewayServicesPaymentGateway\Gateway\Request\AuthorizationRequest">
     <arguments>
-        <argument name="config" xsi:type="object">SamplePaymentGatewayConfig</argument>
+        <argument name="config" xsi:type="object">GatewayServicesPaymentGatewayConfig</argument>
     </arguments>
 </type>
 
 <!-- Response handlers -->
-<virtualType name="SamplePaymentGatewayResponseHandlerComposite" type="Magento\Payment\Gateway\Response\HandlerChain">
+<virtualType name="GatewayServicesPaymentGatewayResponseHandlerComposite" type="Magento\Payment\Gateway\Response\HandlerChain">
     <arguments>
         <argument name="handlers" xsi:type="array">
-            <item name="txnid" xsi:type="string">Magento\SamplePaymentGateway\Gateway\Response\TxnIdHandler</item>
-            <item name="fraud" xsi:type="string">Magento\SamplePaymentGateway\Gateway\Response\FraudHandler</item>
+            <item name="txnid" xsi:type="string">Manfred\GatewayServicesPaymentGateway\Gateway\Response\TxnIdHandler</item>
+            <item name="fraud" xsi:type="string">Manfred\GatewayServicesPaymentGateway\Gateway\Response\FraudHandler</item>
         </argument>
     </arguments>
 </virtualType>
 ```
-* `SamplePaymentGatewayAuthorizeCommand` - instance of GatewayCommand provided by `Payment\Gateway` configured with request builders, response handlers and transfer client
-* `SamplePaymentGatewayAuthorizationRequest` - Composite of request parts used for Authorization
-* `SamplePaymentGatewayResponseHandlerComposite` - Composite\List of response handlers.
+* `GatewayServicesPaymentGatewayAuthorizeCommand` - instance of GatewayCommand provided by `Payment\Gateway` configured with request builders, response handlers and transfer client
+* `GatewayServicesPaymentGatewayAuthorizationRequest` - Composite of request parts used for Authorization
+* `GatewayServicesPaymentGatewayResponseHandlerComposite` - Composite\List of response handlers.
 
 ## Installation
 This module is intended to be installed using composer.  After including this component and enabling it, you can verify it is installed by going the backend at:

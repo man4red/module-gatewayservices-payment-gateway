@@ -3,12 +3,12 @@
  * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\SamplePaymentGateway\Gateway\Http;
+namespace Manfred\GatewayServicesPaymentGateway\Gateway\Http;
 
 use Magento\Payment\Gateway\Http\TransferBuilder;
 use Magento\Payment\Gateway\Http\TransferFactoryInterface;
 use Magento\Payment\Gateway\Http\TransferInterface;
-use Magento\SamplePaymentGateway\Gateway\Request\MockDataRequest;
+use Manfred\GatewayServicesPaymentGateway\Gateway\Request\MockDataRequest;
 
 class TransferFactory implements TransferFactoryInterface
 {

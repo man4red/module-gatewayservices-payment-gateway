@@ -13,7 +13,7 @@ define(
 
         return Component.extend({
             defaults: {
-                template: 'Magento_SamplePaymentGateway/payment/form',
+                template: 'Manfred_GatewayServicesPaymentGateway/payment/form',
                 transactionResult: ''
             },
 
