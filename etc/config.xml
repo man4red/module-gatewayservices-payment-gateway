@@ -12,7 +12,8 @@
                 <debug>1</debug>
                 <active>0</active>
                 <model>GatewayServicesPaymentGatewayFacade</model>
-                <merchant_gateway_key backend_model="Magento\Config\Model\Config\Backend\Encrypted" />
+                <merchant_api_password backend_model="Magento\Config\Model\Config\Backend\Encrypted" />
+                <merchant_private_key backend_model="Magento\Config\Model\Config\Backend\Encrypted" />
                 <order_status>pending_payment</order_status>
                 <payment_action>authorize</payment_action>
                 <title>Payment method (Gateway Services)</title>
@@ -23,7 +24,7 @@
                 <can_use_checkout>1</can_use_checkout>
                 <is_gateway>1</is_gateway>
                 <sort_order>1</sort_order>
-                <debugReplaceKeys>MERCHANT_KEY</debugReplaceKeys>
+                <debugReplaceKeys>MERCHANT_API_PASSWORD,MERCHANT_PRIVATE_KEY</debugReplaceKeys>
                 <paymentInfoKeys>FRAUD_MSG_LIST</paymentInfoKeys>
                 <privateInfoKeys>FRAUD_MSG_LIST</privateInfoKeys>
             </gatewayservices_gateway>

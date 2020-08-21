@@ -15,7 +15,8 @@ class AuthorizeRequestTest extends \PHPUnit_Framework_TestCase
 {
     public function testBuild()
     {
-        $merchantToken = 'secure_token';
+        $merchantApiPassword = 'api_password';
+        $merchantPrivateKey = 'private_key';
         $invoiceId = 1001;
         $grandTotal = 12.2;
         $currencyCode = 'USD';
@@ -28,7 +29,8 @@ class AuthorizeRequestTest extends \PHPUnit_Framework_TestCase
             'AMOUNT' => $grandTotal,
             'CURRENCY' => $currencyCode,
             'EMAIL' => $email,
-            'MERCHANT_KEY' => $merchantToken
+            'MERCHANT_API_PASSWORD' => $merchantApiPassword,
+            'MERCHANT_PRIVATE_KEY' => $merchantPrivateKey
         ];
 
         $configMock = $this->getMock(ConfigInterface::class);
@@ -63,8 +65,13 @@ class AuthorizeRequestTest extends \PHPUnit_Framework_TestCase
 
         $configMock->expects(static::once())
             ->method('getValue')
-            ->with('merchant_gateway_key', $storeId)
-            ->willReturn($merchantToken);
+            ->with('merchant_api_password', $storeId)
+            ->willReturn($merchantApiPassword);
+
+        $configMock->expects(static::once())
+            ->method('getValue')
+            ->with('merchant_private_key', $storeId)
+            ->willReturn($merchantPrivateKey);
 
         /** @var ConfigInterface $configMock */
         $request = new AuthorizationRequest($configMock);

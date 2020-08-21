@@ -15,14 +15,16 @@ class VoidRequestTest extends \PHPUnit_Framework_TestCase
 {
     public function testBuild()
     {
-        $merchantToken = 'secure_token';
+        $merchantApiPassword = 'api_password';
+        $merchantPrivateKey = 'private_key';
         $txnId = 'fcd7f001e9274fdefb14bff91c799306';
         $storeId = 1;
 
         $expectation = [
             'TXN_TYPE' => 'V',
             'TXN_ID' => $txnId,
-            'MERCHANT_KEY' => $merchantToken
+            'MERCHANT_API_PASSWORD' => $merchantApiPassword,
+            'MERCHANT_PRIVATE_KEY' => $merchantPrivateKey
         ];
 
         $configMock = $this->getMock(ConfigInterface::class);
@@ -49,8 +51,13 @@ class VoidRequestTest extends \PHPUnit_Framework_TestCase
 
         $configMock->expects(static::once())
             ->method('getValue')
-            ->with('merchant_gateway_key', $storeId)
-            ->willReturn($merchantToken);
+            ->with('merchant_api_password', $storeId)
+            ->willReturn($merchantApiPassword);
+
+        $configMock->expects(static::once())
+            ->method('getValue')
+            ->with('merchant_private_key', $storeId)
+            ->willReturn($merchantPrivateKey);
 
         /** @var ConfigInterface $configMock */
         $request = new VoidRequest($configMock);
