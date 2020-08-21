@@ -1,5 +1,5 @@
 {
-    "name": "manfred/module-gatewayservices-payment-gateway",
+    "name": "man4red/module-gatewayservices-payment-gateway",
     "description": "Gateway Services integration",
     "require": {
         "php": "~5.5.0|~5.6.0|^7.0.0",
