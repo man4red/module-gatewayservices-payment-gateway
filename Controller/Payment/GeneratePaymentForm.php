@@ -73,7 +73,7 @@ class GeneratePaymentForm extends Action
         \Magento\Framework\UrlInterface $urlBuilder,
         \Magento\Framework\Controller\Result\JsonFactory $resultJsonFactory,
         \Magento\Store\Model\StoreManagerInterface $storeManager = null,
-        \Magento\Sales\Model\OrderFactory $orderFactory
+        \Magento\Sales\Api\OrderRepositoryInterface $orderRepository
      ) {
         parent::__construct($context);
         //$this->storeManager = $storeManager;
@@ -86,7 +86,7 @@ class GeneratePaymentForm extends Action
         $this->resultJsonFactory = $resultJsonFactory; //Used for returning JSON data to the afterPlaceOrder function ($result = $this->resultJsonFactory->create(); return $result->setData($post_data);)
         $this->storeManager = $storeManager ?: ObjectManager::getInstance()
             ->get(\Magento\Store\Model\StoreManagerInterface::class);
-        $this->orderFactory = $orderFactory;
+        $this->orderRepository = $orderRepository;
     }
 
     /*
@@ -97,7 +97,6 @@ class GeneratePaymentForm extends Action
         //ini_set('xdebug.var_display_max_depth', '3');
         //ini_set('xdebug.var_display_max_children', '250');
         //ini_set('xdebug.var_display_max_data', '1500');
-
         $params = $this->generateRequestData();
         $form_action_url = $params['form_action_url'];
         $post_data = array(
@@ -120,16 +119,14 @@ class GeneratePaymentForm extends Action
         $storeId = $this->storeManager->getStore()->getId();
         // Take order
         try {
-            $order = $this->checkoutSession->getLastRealOrder();
             $order_id = $this->checkoutSession->getLastRealOrderId();
             if (empty($order_id)) {
                 throw new \Exception("Oups! We couldn't find your order...");
             }
-
-            // State
+            $order = $this->orderRepository->get($order_id);
+            // Set State/Status
             $orderState = \Magento\Sales\Model\Order::STATE_PENDING_PAYMENT;
             $order->setState($orderState)->setStatus($orderState)->save();
-            //$order = $this->orderRepository->get($orderId);
         } catch (Exception $e) {
             $this->messageManager->addErrorMessage(__($e->getMessage()));
             $this->exceptionLogger->error($e->getMessage());
@@ -178,6 +175,7 @@ class GeneratePaymentForm extends Action
             $customer_email = $order->getShippingAddress()->getCustomerEmail();
         }
 
+
         $return_url = $this->urlBuilder->getUrl('gatewayservices/payment/completecheckout');
 
         $TransactionId = intval("11" . rand(1, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9));
@@ -202,7 +200,7 @@ class GeneratePaymentForm extends Action
                     <Value>' . $order_id . '</Value>
                 </Param>
             </ReturnUrl>
-            <CurrencyCode>' . $this->storeManager->getStore()->getCurrentCurrency()->getCode() . '</CurrencyCode>
+            <CurrencyCode>' . $order->getBaseCurrency()->getCode() . '</CurrencyCode>
             <TotalAmount>' . number_format($order->getGrandTotal(), 2, '', '') . '</TotalAmount>
             <ProductDescription>store_id: ' . $storeId . '; order_id: ' . $order_id .'; tr_id: ' . $TransactionId . '</ProductDescription>
             <CustomerDetails>
@@ -233,7 +231,7 @@ class GeneratePaymentForm extends Action
 
     public function getOrder() {
         if ($this->checkoutSession->getLastRealOrderId()) {
-            $order = $this->orderFactory->create()->loadByIncrementId($this->_checkoutSession->getLastRealOrderId());
+            $order = $this->orderFactory->create()->loadByIncrementId($this->checkoutSession->getLastRealOrderId());
             return $order;
         }
         return false;

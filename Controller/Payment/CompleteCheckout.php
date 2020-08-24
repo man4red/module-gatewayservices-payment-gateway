@@ -146,11 +146,14 @@ class CompleteCheckout extends Action implements CsrfAwareActionInterface
             if (empty($result)) {
                 $error = 'Unknown Payment Error, please try again';
                 $this->messageManager->addErrorMessage(__($error));
+                $comment = $order->addStatusHistoryComment($error);
+                $orderHistory = $this->orderStatusRepository->save($comment);
             } elseif ((string)$result->PaymentStatus != 'APPROVED') {
                 $error = 'Payment Error: ' . (string)$result->Description . ' (' . (string)$result->Code . ')';
                 $this->messageManager->addErrorMessage(__($error));
+                $comment = $order->addStatusHistoryComment($error);
+                $orderHistory = $this->orderStatusRepository->save($comment);
             } elseif ((string)$result->PaymentStatus == 'APPROVED') {
-
                 // State
                 $orderState = \Magento\Sales\Model\Order::STATE_PAYMENT_REVIEW;
                 // Message
