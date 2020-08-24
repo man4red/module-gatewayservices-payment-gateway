@@ -50,21 +50,43 @@ class GeneratePaymentForm extends Action
      */
     private $orderInformationManagement;
 
+    /**
+     * @var \Magento\Store\Model\StoreManagerInterface
+     */
+    private $storeManager;
+
+    /**
+     * @var \Magento\Sales\Model\OrderFactory
+     */
+    private $orderFactory;
+
+
     public function __construct(
         Context $context,
+        //\Magento\Store\Model\StoreManagerInterface $storeManager,
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig, 
-        Session $checkoutSession, 
+        CartManagementInterface $cartManagement,
+        GuestCartManagementInterface $guestCartManagement,
+        CheckoutSession $checkoutSession,
+        Session $session,
         \Magento\Framework\Locale\Resolver $store,
         \Magento\Framework\UrlInterface $urlBuilder,
-        \Magento\Framework\Controller\Result\JsonFactory $resultJsonFactory, 
-        \Magento\Directory\Model\CountryFactory $countryFactory
-    ) {
+        \Magento\Framework\Controller\Result\JsonFactory $resultJsonFactory,
+        \Magento\Store\Model\StoreManagerInterface $storeManager = null,
+        \Magento\Sales\Model\OrderFactory $orderFactory
+     ) {
         parent::__construct($context);
+        //$this->storeManager = $storeManager;
         $this->scopeConfig = $scopeConfig; //Used for getting data from System/Admin config
+        $this->cartManagement = $cartManagement;
         $this->checkoutSession = $checkoutSession; //Used for getting the order: $order = $this->checkoutSession->getLastRealOrder(); And other order data like ID & amount
+        $this->session = $session;
         $this->store = $store; //Used for getting store locale if needed $language_code = $this->store->getLocale();
         $this->urlBuilder = $urlBuilder; //Used for creating URLs to other custom controllers, for example $success_url = $this->urlBuilder->getUrl('frontname/path/action');
         $this->resultJsonFactory = $resultJsonFactory; //Used for returning JSON data to the afterPlaceOrder function ($result = $this->resultJsonFactory->create(); return $result->setData($post_data);)
+        $this->storeManager = $storeManager ?: ObjectManager::getInstance()
+            ->get(\Magento\Store\Model\StoreManagerInterface::class);
+        $this->orderFactory = $orderFactory;
     }
 
     /*
@@ -72,18 +94,18 @@ class GeneratePaymentForm extends Action
      */
     public function execute()
     {
-        //Your custom code for getting the data the payment provider needs
-        //Structure your return data so the form-builder.js can build your form correctly
-        $form_action_url = 'https://test.gateway-services.com/acquiring.php';
-        $shop_id = '';
-        $order_id = '';
-        $api_key = '';
+        //ini_set('xdebug.var_display_max_depth', '3');
+        //ini_set('xdebug.var_display_max_children', '250');
+        //ini_set('xdebug.var_display_max_data', '1500');
+
+        $params = $this->generateRequestData();
+        $form_action_url = $params['form_action_url'];
         $post_data = array(
             'action' => $form_action_url,
             'fields' => array (
-                'shop_id' => $shop_id,
-                'order_id' => $order_id,
-                'api_key' => $api_key,
+                'version' => $params['version'],
+                'encodedMessage' => $params['encodedMessage'],
+                'signature' => $params['signature'],
                 //add all the fields you need
             )
         );
@@ -92,4 +114,128 @@ class GeneratePaymentForm extends Action
         return $result->setData($post_data); //return data in JSON format
     }
 
+
+    function generateRequestData()
+    {
+        $storeId = $this->storeManager->getStore()->getId();
+        // Take order
+        try {
+            $order = $this->checkoutSession->getLastRealOrder();
+            $order_id = $this->checkoutSession->getLastRealOrderId();
+            if (empty($order_id)) {
+                throw new \Exception("Oups! We couldn't find your order...");
+            }
+
+            // State
+            $orderState = \Magento\Sales\Model\Order::STATE_PENDING_PAYMENT;
+            $order->setState($orderState)->setStatus($orderState)->save();
+            //$order = $this->orderRepository->get($orderId);
+        } catch (Exception $e) {
+            $this->messageManager->addErrorMessage(__($e->getMessage()));
+            $this->exceptionLogger->error($e->getMessage());
+            return $this->_redirect('checkout/cart');
+        }
+
+        $merchant_id = $this->scopeConfig->getValue('payment/gatewayservices_gateway/merchant_id', 
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+        $terminal_id = $this->scopeConfig->getValue('payment/gatewayservices_gateway/terminal_id', 
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+        $merchant_api_password = $this->scopeConfig->getValue('payment/gatewayservices_gateway/merchant_api_password', 
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+        $merchant_private_key = $this->scopeConfig->getValue('payment/gatewayservices_gateway/merchant_private_key', 
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+        $transaction_type_id = $this->scopeConfig->getValue('payment/gatewayservices_gateway/transaction_type_id', 
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+
+        $test_mode = $this->scopeConfig->getValue('payment/gatewayservices_gateway/test_mode', 
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+
+        if($test_mode === '0') {
+            $form_action_url = 'https://gateway-services.com/acquiring.php';
+        } else {
+            $form_action_url = 'https://test.gateway-services.com/acquiring.php';
+        }
+
+        if (!$this->session->isLoggedIn()) {
+            $requestParams = $this->getRequest()->getParams();//get reequest params
+            if(isset($requestParams['CustomerEmail'])) {
+                $customer_email = $requestParams['CustomerEmail'];
+            }
+            $order->setCheckoutMethod(CartManagementInterface::METHOD_GUEST);
+        } else {
+            $customer_email = $order->getShippingAddress()->getCustomerEmail();
+        }
+
+        $return_url = $this->urlBuilder->getUrl('gatewayservices/payment/completecheckout');
+
+        $TransactionId = intval("11" . rand(1, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9));
+        $ApiPassword_encrypt = hash('sha256', $merchant_api_password);
+        $xmlReq = '<?xml version="1.0" encoding="UTF-8" ?>
+        <TransactionRequest>
+            <Language>ENG</Language>
+            <Credentials>
+                <MerchantId>' . $merchant_id . '</MerchantId>
+                <TerminalId>' . $terminal_id . '</TerminalId>
+                <TerminalPassword>' . $ApiPassword_encrypt . '</TerminalPassword>
+            </Credentials>
+            <TransactionType>' . ($transaction_type_id != '' ? $transaction_type_id : 'LP101') . '</TransactionType>
+            <TransactionId>' . $TransactionId . '</TransactionId>
+            <ReturnUrl page="' . $return_url . '">
+                <Param>
+                    <Key>gws_trans</Key>
+                    <Value>' . $TransactionId . '</Value>
+                </Param>
+                <Param>
+                    <Key>order_id</Key>
+                    <Value>' . $order_id . '</Value>
+                </Param>
+            </ReturnUrl>
+            <CurrencyCode>' . $this->storeManager->getStore()->getCurrentCurrency()->getCode() . '</CurrencyCode>
+            <TotalAmount>' . number_format($order->getGrandTotal(), 2, '', '') . '</TotalAmount>
+            <ProductDescription>store_id: ' . $storeId . '; order_id: ' . $order_id .'; tr_id: ' . $TransactionId . '</ProductDescription>
+            <CustomerDetails>
+                <FirstName>' . $order->getShippingAddress()->getFirstname() . '</FirstName>
+                <LastName>' . $order->getShippingAddress()->getLastname() . '</LastName>
+                <CustomerIP>' . $order->getData()['remote_ip'] . '</CustomerIP>
+                <Phone>' . $order->getShippingAddress()->getTelephone() . '</Phone>
+                <Email>' . $customer_email . '</Email>
+                <Street>' .  $order->getShippingAddress()->getStreetLine(1) . '</Street>
+                <City>' . $order->getShippingAddress()->getCity() . '</City>
+                <Region>' . $order->getShippingAddress()->getRegion() . '</Region>
+                <Country>' . $order->getBillingAddress()->getCountryId() . '</Country>
+                <Zip>' . $order->getShippingAddress()->getPostcode() . '</Zip>
+            </CustomerDetails>
+        </TransactionRequest>';
+
+        // Add signature
+        $signature_key = trim($merchant_private_key . $merchant_api_password . $TransactionId);
+        $signature = base64_encode(hash_hmac("sha256", trim($xmlReq), $signature_key, True));
+        $encodedMessage = base64_encode($xmlReq);
+        $params = array(
+            'form_action_url' => $form_action_url,
+            'version' => '1.0',
+            'encodedMessage' => $encodedMessage,
+            'signature' => $signature);
+        return $params;
+    }
+
+    public function getOrder() {
+        if ($this->checkoutSession->getLastRealOrderId()) {
+            $order = $this->orderFactory->create()->loadByIncrementId($this->_checkoutSession->getLastRealOrderId());
+            return $order;
+        }
+        return false;
+    }
 }

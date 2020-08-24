@@ -6,7 +6,7 @@
 namespace Manfred\GatewayServicesPaymentGateway\Model\Ui;
 
 use Magento\Checkout\Model\ConfigProviderInterface;
-use Manfred\GatewayServicesPaymentGateway\Gateway\Http\Client\ClientMock;
+//use Manfred\GatewayServicesPaymentGateway\Gateway\Http\Client\ClientMock;
 
 /**
  * Class ConfigProvider
@@ -24,12 +24,12 @@ final class ConfigProvider implements ConfigProviderInterface
     {
         return [
             'payment' => [
-                self::CODE => [
+                /*self::CODE => [
                     'transactionResults' => [
                         ClientMock::SUCCESS => __('Success'),
                         ClientMock::FAILURE => __('Fraud')
                     ]
-                ]
+                ]*/
             ]
         ];
     }
