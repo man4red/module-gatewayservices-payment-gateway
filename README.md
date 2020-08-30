@@ -4,7 +4,7 @@ An extension to add integration with Gateway Services Payment Gateway.
 
 ## Installation
 This module is intended to be installed using composer.  
-```composer require man4red/module-gatewayservices-payment-gateway:1.0.0```  
+```composer require man4red/module-gatewayservices-payment-gateway:1.0.1```  
 upgrade your magento using  
 ```bin/magento-cli setup:upgrade```  
 or  
