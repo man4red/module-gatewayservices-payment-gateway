@@ -41,11 +41,6 @@ class GeneratePaymentForm extends Action
     private $pageFactory;
 
     /**
-     * @var ExceptionLogger
-     */
-    private $exceptionLogger;
-
-    /**
      * @var OrderInformationManagementInterface
      */
     private $orderInformationManagement;
@@ -94,10 +89,10 @@ class GeneratePaymentForm extends Action
      */
     public function execute()
     {
-        //ini_set('xdebug.var_display_max_depth', '3');
-        //ini_set('xdebug.var_display_max_children', '250');
-        //ini_set('xdebug.var_display_max_data', '1500');
         $params = $this->generateRequestData();
+        if (!$params) {
+            return $this->_redirect('checkout/cart');
+        }
         $form_action_url = $params['form_action_url'];
         $post_data = array(
             'action' => $form_action_url,
@@ -121,7 +116,7 @@ class GeneratePaymentForm extends Action
         try {
             $order_id = $this->checkoutSession->getLastRealOrderId();
             if (empty($order_id)) {
-                throw new \Exception("Oups! We couldn't find your order...");
+                return false;
             }
             $order = $this->orderRepository->get($order_id);
             // Set State/Status
@@ -130,7 +125,7 @@ class GeneratePaymentForm extends Action
         } catch (Exception $e) {
             $this->messageManager->addErrorMessage(__($e->getMessage()));
             $this->exceptionLogger->error($e->getMessage());
-            return $this->_redirect('checkout/cart');
+            return false;
         }
 
         $merchant_id = $this->scopeConfig->getValue('payment/gatewayservices_gateway/merchant_id', 

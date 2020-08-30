@@ -139,5 +139,4 @@
             <argument name="config" xsi:type="object">GatewayServicesPaymentGatewayConfig</argument>
         </arguments>
     </type>
-
 </config>
